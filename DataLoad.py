@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 
 def tokenize_function(examples):
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     return tokenizer(examples["sentence"], padding="max_length", truncation=True)
 
 

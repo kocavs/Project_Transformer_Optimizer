@@ -2,5 +2,5 @@
 
 # Requirement
 
-1. torchtext
-2. portalocker>=2.0.0
+1. transformer
+2. datasets
