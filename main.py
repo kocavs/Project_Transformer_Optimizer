@@ -1,87 +1,132 @@
 #IMPORT function and class from our own files
 from DataLoad import dataloader
-from transformers import AutoModelForSequenceClassification
 import torch
+import argparse
+import time
+
+from transformers import  AutoModelForSequenceClassification
+from torch.optim import AdamW
+from transformers import get_scheduler
+from datasets import load_dataset
+
 from torch.distributed.pipeline.sync import Pipe
 from torch.distributed import rpc
-import argparse
+
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def train(model, dataloader, optimizer, scheduler):
+def preprocess_data(examples, tokenizer, max_length=512):
+    tokenized = tokenizer(
+        examples["text"],
+        padding="max_length",
+        truncation=True,
+        max_length=max_length,
+        return_tensors="pt",
+    )
+    
+    return {
+        "input_ids": tokenized["input_ids"],
+        "attention_mask": tokenized["attention_mask"],
+        "labels": torch.tensor(examples["label"]),
+    }
+
+def calcuate_accuracy(preds, labels):
+  idx_max = torch.argmax(preds, dim=-1)
+  n_correct = (idx_max==labels).sum().item()
+  return n_correct
+
+def train(model, train_loader, optimizer, scheduler):
     model.train()
     total_loss = 0
+    num_correct = 0
+    num_total = 0
     for batch in train_loader:
+        #print(batch['input_ids'])
         labels = batch['labels'].to(device)
         input_ids = batch['input_ids'].to(device)
-        token_type_ids = batch['token_type_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
         
-        optimizer.zero_grad()
-        
-        outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-        loss = outputs.loss
+        outputs = model(input_ids, attention_mask).logits
+        loss = torch.nn.CrossEntropyLoss()(outputs, labels)
+
         loss.backward()
         optimizer.step()
         scheduler.step()
-        
+        optimizer.zero_grad()
+
+        num_correct += calcuate_accuracy(outputs, labels)
         total_loss += loss.item()
+        num_total += labels.size(0)
         
-    avg_train_loss = total_loss / len(train_loader)
-    return avg_train_loss
+    avg_train_loss = total_loss / num_total
+    avg_train_acc = num_correct / num_total * 100.0
+    
+    return avg_train_loss, avg_train_acc
 
 def evaluate(model, test_loader):
     model.eval()
     total_loss = 0
     total_correct = 0
     total_samples = 0
-
+    num_total = 0
     with torch.no_grad():
         for batch in test_loader:
             
             labels = batch['labels'].to(device)
             input_ids = batch['input_ids'].to(device)
-            token_type_ids = batch['token_type_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
 
-            corrected_labels = torch.where(labels == -1, torch.zeros_like(labels), labels)
-            output = model(input_ids, attention_mask, token_type_ids)
-            logits = output.logits
-            loss = torch.nn.CrossEntropyLoss()(logits, corrected_labels)
+            output = model(input_ids, attention_mask).logits
+            loss = torch.nn.CrossEntropyLoss()(output, labels)
+
             total_loss += loss.item()
+            total_correct += calcuate_accuracy(output, labels)
+            total_samples += labels.size(0)
+            num_total += labels.size(0)
 
-            predictions = torch.argmax(logits, dim=-1)
-            correct = (predictions == corrected_labels).sum().item()
-            total_correct += correct
-            total_samples += corrected_labels.size(0)
-
-    average_loss = total_loss / len(test_loader)
-    accuracy = total_correct / total_samples
+    average_loss = total_loss / num_total
+    accuracy = total_correct / num_total * 100.0
 
     return average_loss, accuracy
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--pretrained_model_name', type=str, default='bert-base-uncased', help='Name of the pre-trained BERT model')
-parser.add_argument('--epochs', type=int, default=10, help='Number of training epochs')
-parser.add_argument('--num_classes', type=int, default=2, help='Number of classes')
-parser.add_argument('--lr', type=int, default=5, help='Learning Rate')
+parser.add_argument('--epoch', type=int, default=3, help='Number of training epoches')
+parser.add_argument('--num_classes', type=int, default=4, help='Number of classes')
+parser.add_argument('--lr', type=int, default=5e-5, help='Learning Rate')
 opts = parser.parse_args()
 
-train_loader, test_loader = dataloader(name="cola", num_train=1000, num_test=1000, batch_size=64)
-model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=2)
+train_loader, test_loader = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=5000, test_length=1000, batch_size=8)
+
+model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=opts.num_classes)
 model.to(device)
 
-optimizer = torch.optim.SGD(model.parameters(), lr=opts.lr)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
+# Set the optimizer
+optimizer = AdamW(model.parameters(), lr=opts.lr)
 
-for epoch in range(opts.epochs):
-    avg_train_loss = train(model, train_loader, optimizer, scheduler)
-    avg_test_loss, acc = evaluate(model, test_loader)
-    print(f"Training epoch {epoch+1}/{opts.epochs} - Training Loss: {avg_train_loss:.4f} - Testing Loss: {avg_test_loss:.4f} - Accuracy: {(acc*100):.4f}%")
+num_training_steps = opts.epoch * len(train_loader)
+scheduler = get_scheduler(
+    name="linear", 
+    optimizer=optimizer, 
+    num_warmup_steps=0, 
+    num_training_steps=num_training_steps
+)
 
-
-
+for epoch in range(opts.epoch):
+    start_time = time.time()
+    
+    avg_train_loss, avg_train_acc = train(model, train_loader, optimizer, scheduler)
+    
+    end_time = time.time()
+    avg_test_loss, avg_test_acc = evaluate(model, test_loader)
+    
+    epoch_time = end_time - start_time
+    print("Epoch: ", epoch)
+    print(f'\tTrain Loss: {avg_train_loss:.5f} | Train Acc: {avg_train_acc:.2f}%')
+    print(f'\tTest. Loss: {avg_test_loss:.5f} |  Test Acc: {avg_test_acc:.2f}%')
+    print(f"\tTime: {epoch_time:.2f} seconds")
 
 
 

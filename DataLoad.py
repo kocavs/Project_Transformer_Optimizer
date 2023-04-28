@@ -3,23 +3,25 @@ from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 
 
-def tokenize_function(examples):
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-    return tokenizer(examples["sentence"], padding="max_length", truncation=True)
 
 
-def dataloader(name, num_train, num_test, batch_size):
+def dataloader(name, token_name, train_length, test_length, batch_size):
+  
+    def tokenize_function(examples):
+      tokenizer = AutoTokenizer.from_pretrained(token_name)
+      return tokenizer(examples["text"], padding="max_length", truncation=True)
+    
     # Download dataset
-    datasets = load_dataset("glue", name, cache_dir="./dataset")
+    datasets = load_dataset(name, cache_dir="./dataset")
     # Tokenizing dataset
     tokenized_datasets = datasets.map(tokenize_function, batched=True)
-    tokenized_datasets = tokenized_datasets.remove_columns(["sentence"])
-    tokenized_datasets = tokenized_datasets.remove_columns(["idx"])
+    #tokenized_datasets = tokenized_datasets.map(map_to_zero_label)
+    # tokenized_datasets = tokenized_datasets.remove_columns(["text"])
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     tokenized_datasets.set_format("torch")
     # print("train_datasets: \n", tokenized_datasets)
-    train_datasets = tokenized_datasets["train"].select(range(num_train))
-    test_datasets = tokenized_datasets["test"].select(range(num_test))
+    train_datasets = tokenized_datasets["train"].select(range(train_length))
+    test_datasets = tokenized_datasets["test"].select(range(test_length))
 
     # print("train_datasets: \n", train_datasets)
     # print(train_datasets["input_ids"].shape)
@@ -29,6 +31,3 @@ def dataloader(name, num_train, num_test, batch_size):
     test_dataloader = DataLoader(test_datasets, batch_size=batch_size)
 
     return train_dataloader, test_dataloader
-
-
-# dataloader(name="cola", num_train=1000, num_test=1000, batch_size=64)
