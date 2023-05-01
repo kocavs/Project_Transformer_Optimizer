@@ -2,9 +2,6 @@ from datasets import load_dataset
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 
-
-
-
 def dataloader(name, token_name, train_length, test_length, batch_size):
   
     def tokenize_function(examples):

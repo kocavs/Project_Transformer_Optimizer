@@ -3,50 +3,47 @@ from DataLoad import dataloader
 import torch
 import argparse
 import time
+import os
 
 from transformers import  AutoModelForSequenceClassification
 from torch.optim import AdamW
 from transformers import get_scheduler
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 
-from torch.distributed.pipeline.sync import Pipe
-from torch.distributed import rpc
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
+import torch.multiprocessing as mp
+import torch.distributed as dist
 
+# from torch.distributed.pipeline.sync import Pipe
+# from torch.distributed import rpc
+# import tempfile
 
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-def preprocess_data(examples, tokenizer, max_length=512):
-    tokenized = tokenizer(
-        examples["text"],
-        padding="max_length",
-        truncation=True,
-        max_length=max_length,
-        return_tensors="pt",
-    )
-    
-    return {
-        "input_ids": tokenized["input_ids"],
-        "attention_mask": tokenized["attention_mask"],
-        "labels": torch.tensor(examples["label"]),
-    }
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def calcuate_accuracy(preds, labels):
   idx_max = torch.argmax(preds, dim=-1)
   n_correct = (idx_max==labels).sum().item()
   return n_correct
 
-def train(model, train_loader, optimizer, scheduler):
+def train(model, train_loader, optimizer, scheduler, rank=None):
     model.train()
     total_loss = 0
     num_correct = 0
     num_total = 0
     for batch in train_loader:
         #print(batch['input_ids'])
-        labels = batch['labels'].to(device)
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        
+        if rank:
+            labels = batch['labels'].cuda(rank)
+            input_ids = batch['input_ids'].cuda(rank)
+            attention_mask = batch['attention_mask'].cuda(rank)
+            
+        else:
+            labels = batch['labels'].to(device)
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+         
         outputs = model(input_ids, attention_mask).logits
         loss = torch.nn.CrossEntropyLoss()(outputs, labels)
 
@@ -64,7 +61,7 @@ def train(model, train_loader, optimizer, scheduler):
     
     return avg_train_loss, avg_train_acc
 
-def evaluate(model, test_loader):
+def evaluate(model, test_loader, rank=None):
     model.eval()
     total_loss = 0
     total_correct = 0
@@ -72,10 +69,15 @@ def evaluate(model, test_loader):
     num_total = 0
     with torch.no_grad():
         for batch in test_loader:
-            
-            labels = batch['labels'].to(device)
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
+            if rank:
+                labels = batch['labels'].cuda(rank)
+                input_ids = batch['input_ids'].cuda(rank)
+                attention_mask = batch['attention_mask'].cuda(rank) 
+            else:
+                labels = batch['labels'].to(device)
+                input_ids = batch['input_ids'].to(device)
+                attention_mask = batch['attention_mask'].to(device)
+                
 
             output = model(input_ids, attention_mask).logits
             loss = torch.nn.CrossEntropyLoss()(output, labels)
@@ -90,43 +92,101 @@ def evaluate(model, test_loader):
 
     return average_loss, accuracy
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--pretrained_model_name', type=str, default='bert-base-uncased', help='Name of the pre-trained BERT model')
-parser.add_argument('--epoch', type=int, default=3, help='Number of training epoches')
-parser.add_argument('--num_classes', type=int, default=4, help='Number of classes')
-parser.add_argument('--lr', type=int, default=5e-5, help='Learning Rate')
-opts = parser.parse_args()
-
-train_loader, test_loader = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=5000, test_length=1000, batch_size=8)
-
-model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=opts.num_classes)
-model.to(device)
-
-# Set the optimizer
-optimizer = AdamW(model.parameters(), lr=opts.lr)
-
-num_training_steps = opts.epoch * len(train_loader)
-scheduler = get_scheduler(
-    name="linear", 
-    optimizer=optimizer, 
-    num_warmup_steps=0, 
-    num_training_steps=num_training_steps
-)
-
-for epoch in range(opts.epoch):
-    start_time = time.time()
+def main(rank=None, world_size=None, opts=None):
+    # model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=opts.num_classes)
     
-    avg_train_loss, avg_train_acc = train(model, train_loader, optimizer, scheduler)
+    # if rank:
+    #     os.environ["MASTER_ADDR"] = "localhost"
+    #     os.environ["MASTER_PORT"] = "12355"
+        
+    #     torch.cuda.set_device(rank)
+
+    #     dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    #     _, _, train_dataset, test_dataset = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=1000, batch_size=opts.batch_size)
+        
+    #     # Setup data loader with DistributedSampler
+    #     train_sampler = DistributedSampler(train_dataset)
+    #     test_sampler = DistributedSampler(test_dataset)
+
+    #     train_loader = DataLoader(train_dataset, batch_size=opts.batch_size, num_workers=4, sampler=train_sampler)
+    #     test_loader = DataLoader(test_dataset, batch_size=opts.batch_size, num_workers=4, sampler=test_sampler)
+    #     model.to(rank)
+    #     model = DDP(model, device_ids=[rank])
+    # else:
+    #     train_loader, test_loader, _, _ = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=1000, batch_size=opts.batch_size)
+    #     model.to(device)
     
-    end_time = time.time()
-    avg_test_loss, avg_test_acc = evaluate(model, test_loader)
+    train_loader, test_loader, _, _ = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=1000, batch_size=opts.batch_size)
+    model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=opts.num_classes)
     
-    epoch_time = end_time - start_time
-    print("Epoch: ", epoch)
-    print(f'\tTrain Loss: {avg_train_loss:.5f} | Train Acc: {avg_train_acc:.2f}%')
-    print(f'\tTest. Loss: {avg_test_loss:.5f} |  Test Acc: {avg_test_acc:.2f}%')
-    print(f"\tTime: {epoch_time:.2f} seconds")
+    if world_size > 1:
+        model = torch.nn.DataParallel(model, device_ids=[0, 1])
+    
+    model.to(device)
+    
+    # Set the optimizer
+    optimizer = AdamW(model.parameters(), lr=opts.lr)
+
+    num_training_steps = opts.epoch * len(train_loader)
+    scheduler = get_scheduler(
+        name="linear", 
+        optimizer=optimizer, 
+        num_warmup_steps=0, 
+        num_training_steps=num_training_steps
+    )
+    
+    for epoch in range(opts.epoch):
+        start_time = time.time()
+        
+        avg_train_loss, avg_train_acc = train(model, train_loader, optimizer, scheduler, rank)
+        end_time = time.time()
+        avg_test_loss, avg_test_acc = evaluate(model, test_loader, rank)
+        
+        epoch_time = end_time - start_time
+        
+        if epoch > 0:
+            print("Epoch: ", epoch)
+            print(f'\tTrain Loss: {avg_train_loss:.5f} | Train Acc: {avg_train_acc:.2f}%')
+            print(f'\tTest. Loss: {avg_test_loss:.5f} |  Test Acc: {avg_test_acc:.2f}%')
+            print(f"\tTime: {epoch_time:.2f} seconds")
+        else:
+            print("Warm Up train")
+    
+    if rank:
+        dist.destroy_process_group()
+
+
+if __name__ == "__main__":
+    
+    num_gpu = torch.cuda.device_count()
+    print(f"You are using {num_gpu} GPUS!")
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pretrained_model_name', type=str, default='bert-base-uncased', help='Name of the pre-trained BERT model')
+    parser.add_argument('--epoch', type=int, default=3, help='Number of training epoches')
+    parser.add_argument('--num_classes', type=int, default=4, help='Number of classes')
+    parser.add_argument('--lr', type=int, default=5e-5, help='Learning Rate')
+    parser.add_argument('--DP', type=bool, default=False, help='enable data parallel')
+    parser.add_argument('--pipe', type=bool, default=False, help='enable pipeline model')
+    parser.add_argument('--batch_size', type=int, default=8, help='Batch size for training and testing')
+    opts = parser.parse_args()
+    
+    # enable Distributed Data parallel
+    if opts.DP:
+        # device_ids = [i for i in range(num_gpu)]
+        # mp.spawn(main, args=(num_gpu, opts), nprocs=num_gpu, join=True)
+        main(world_size=num_gpu, opts=opts)
+    else:
+        main(world_size=num_gpu, opts=opts)
+       
+        
+        
+        
+
+
+
+
+
 
 
 
