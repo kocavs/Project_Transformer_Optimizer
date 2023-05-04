@@ -19,6 +19,11 @@ python main.py
         --pipe PIPE           enable pipeline model
         --batch_size BATCH_SIZE Batch size for training and testing
 
+For distributed Data Parallel, run it by
+
+CUDA_VISIBLE_DEVICES="0,1" python -m torch.distributed.launch --nproc_per_node 2 ddp.py --ddp --batch_size 32 --pretrained_model_name "roberta-base"
+
+
 # Pretrained result with three models (With batch size 32 and one warm up epoch)
 ## bert-base-uncased
 Epoch:  1<br>
