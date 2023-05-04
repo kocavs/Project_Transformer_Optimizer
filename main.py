@@ -78,7 +78,6 @@ def evaluate(model, test_loader, rank=None):
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
                 
-
             output = model(input_ids, attention_mask).logits
             loss = torch.nn.CrossEntropyLoss()(output, labels)
 
@@ -88,7 +87,7 @@ def evaluate(model, test_loader, rank=None):
             num_total += labels.size(0)
 
     average_loss = total_loss / num_total
-    accuracy = total_correct / num_total * 100.0
+    accuracy = (total_correct / num_total) * 100.0
 
     return average_loss, accuracy
 
@@ -116,12 +115,11 @@ def main(rank=None, world_size=None, opts=None):
     #     train_loader, test_loader, _, _ = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=1000, batch_size=opts.batch_size)
     #     model.to(device)
     
-    train_loader, test_loader, _, _ = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=1000, batch_size=opts.batch_size)
+    train_loader, test_loader, _, _ = dataloader(name="ag_news", token_name=opts.pretrained_model_name, train_length=10000, test_length=5000, batch_size=opts.batch_size)
     model = AutoModelForSequenceClassification.from_pretrained(opts.pretrained_model_name, num_labels=opts.num_classes)
     
     if world_size > 1:
         model = torch.nn.DataParallel(model, device_ids=[0, 1])
-    
     model.to(device)
     
     # Set the optimizer
@@ -139,7 +137,9 @@ def main(rank=None, world_size=None, opts=None):
         start_time = time.time()
         
         avg_train_loss, avg_train_acc = train(model, train_loader, optimizer, scheduler, rank)
+        
         end_time = time.time()
+        
         avg_test_loss, avg_test_acc = evaluate(model, test_loader, rank)
         
         epoch_time = end_time - start_time
@@ -154,7 +154,6 @@ def main(rank=None, world_size=None, opts=None):
     
     if rank:
         dist.destroy_process_group()
-
 
 if __name__ == "__main__":
     

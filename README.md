@@ -50,6 +50,7 @@ Epoch:  2
         Test. Loss: 0.00653 |  Test Acc: 94.40%
         Time: 340.17 seconds
 
+
 # Using DP (Data Parallel) with three models (With batch size 32 and one warm up epoch)
 ## bert-base-uncased
 Epoch:  1
@@ -81,3 +82,75 @@ Epoch:  2
         Train Loss: 0.00341 | Train Acc: 96.58%
         Test. Loss: 0.00677 |  Test Acc: 94.10%
         Time: 113.67 seconds
+
+
+
+# Pretrained result with three models (With batch size 128 and one warm up epoch)
+## bert-base-uncased
+Epoch:  1
+        Train Loss: 0.00144 | Train Acc: 94.14%
+        Test. Loss: 0.00195 |  Test Acc: 91.48%
+        Time: 172.10 seconds
+Epoch:  2
+        Train Loss: 0.00087 | Train Acc: 96.77%
+        Test. Loss: 0.00194 |  Test Acc: 92.12%
+        Time: 172.30 seconds
+
+## distilbert-base-uncased:
+Epoch:  1
+        Train Loss: 0.00192 | Train Acc: 92.14%
+        Test. Loss: 0.00218 |  Test Acc: 90.92%
+        Time: 88.13 seconds
+Epoch:  2
+        Train Loss: 0.00128 | Train Acc: 95.25%
+        Test. Loss: 0.00199 |  Test Acc: 91.78%
+        Time: 88.29 seconds
+
+## roberta-base:
+Epoch:  1
+        Train Loss: 0.00159 | Train Acc: 93.39%
+        Test. Loss: 0.00188 |  Test Acc: 92.86%
+        Time: 172.63 seconds
+Epoch:  2
+        Train Loss: 0.00100 | Train Acc: 96.07%
+        Test. Loss: 0.00187 |  Test Acc: 93.16%
+        Time: 172.64 seconds
+
+
+# Using DP (Data Parallel) with three models (With batch size 128 and one warm up epoch)
+## bert-base-uncased
+Epoch:  1
+        Train Loss: 0.00153 | Train Acc: 93.88%
+        Test. Loss: 0.00197 |  Test Acc: 91.86%
+        Time: 171.70 seconds
+Epoch:  2
+        Train Loss: 0.00097 | Train Acc: 96.40%
+        Test. Loss: 0.00195 |  Test Acc: 91.96%
+        Time: 171.77 seconds
+
+## distilbert-base-uncased:
+Epoch:  1
+        Train Loss: 0.00167 | Train Acc: 93.17%
+        Test. Loss: 0.00212 |  Test Acc: 91.74%
+        Time: 87.86 seconds
+Epoch:  2
+        Train Loss: 0.00114 | Train Acc: 95.85%
+        Test. Loss: 0.00201 |  Test Acc: 91.76%
+        Time: 88.27 seconds
+
+
+## roberta-base:
+Epoch:  1
+        Train Loss: 0.00149 | Train Acc: 93.93%
+        Test. Loss: 0.00178 |  Test Acc: 92.68%
+        Time: 172.27 seconds
+Epoch:  2
+        Train Loss: 0.00096 | Train Acc: 96.17%
+        Test. Loss: 0.00195 |  Test Acc: 92.56%
+        Time: 172.65 seconds
+
+
+
+## pipline running requirement
+        1. export LD_LIBRARY_PATH=/lib:/lib64:/usr/lib:/share/apps/openmpi/4.0.5/gcc/lib:${LD_LIBRARY_PATH}
+        2. pip install mpi4py

@@ -12,7 +12,7 @@ def dataloader(name, token_name, train_length, test_length, batch_size):
     datasets = load_dataset(name, cache_dir="./dataset")
     # Tokenizing dataset
     tokenized_datasets = datasets.map(tokenize_function, batched=True)
-    #tokenized_datasets = tokenized_datasets.map(map_to_zero_label)
+    # tokenized_datasets = tokenized_datasets.map(map_to_zero_label)
     # tokenized_datasets = tokenized_datasets.remove_columns(["text"])
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     tokenized_datasets.set_format("torch")
@@ -27,4 +27,4 @@ def dataloader(name, token_name, train_length, test_length, batch_size):
     train_dataloader = DataLoader(train_datasets, shuffle=True, batch_size=batch_size)
     test_dataloader = DataLoader(test_datasets, batch_size=batch_size)
 
-    return train_dataloader, test_dataloader
+    return train_dataloader, test_dataloader, train_datasets, test_datasets
