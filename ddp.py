@@ -91,22 +91,18 @@ def train(model, train_loader, optimizer, scheduler, loss_func, epoch, rank=None
     return avg_train_loss, avg_train_acc
 
 
-def evaluate(model, test_loader, loss_func, rank=None):
+def evaluate(model, test_loader, loss_func, epoch, rank=None):
     model.eval()
     total_loss = 0
     total_correct = 0
     total_samples = 0
     num_total = 0
+    test_loader.sampler.set_epoch(epoch)
     with torch.no_grad():
         for batch in test_loader:
-            if rank:
-                labels = batch['labels'].cuda(rank)
-                input_ids = batch['input_ids'].cuda(rank)
-                attention_mask = batch['attention_mask'].cuda(rank)
-            else:
-                labels = batch['labels'].to(device)
-                input_ids = batch['input_ids'].to(device)
-                attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].cuda(rank)
+            input_ids = batch['input_ids'].cuda(rank)
+            attention_mask = batch['attention_mask'].cuda(rank)
 
             output = model(input_ids, attention_mask).logits
             loss = loss_func(output, labels)
@@ -115,11 +111,10 @@ def evaluate(model, test_loader, loss_func, rank=None):
             total_correct += calcuate_accuracy(output, labels)
             total_samples += labels.size(0)
             num_total += labels.size(0)
+            average_loss = total_loss / num_total
+            accuracy = total_correct / num_total * 100.0
 
-    average_loss = total_loss / num_total
-    accuracy = total_correct / num_total * 100.0
-
-    return average_loss, accuracy
+        return average_loss, accuracy
 
 
 def main(opts):
@@ -158,13 +153,16 @@ def main(opts):
         start_time = time.time()
         avg_train_loss, avg_train_acc = train(model, train_loader, optimizer, scheduler, evaluation, epoch, local_rank)
         end_time = time.time()
-        # avg_test_loss, avg_test_acc = evaluate(model, test_loader, evaluation, local_rank)
+        if local_rank == 0:
+            avg_test_loss, avg_test_acc = evaluate(model, test_loader, evaluation, epoch, local_rank)
 
         epoch_time = end_time - start_time
 
         if epoch > 0:
             print("Epoch: ", epoch)
             print(f'\tTrain Loss: {avg_train_loss:.5f} | Train Acc: {avg_train_acc:.2f}%')
+            if local_rank==0:
+                print(f'\tTest Loss: {avg_test_loss:.5f} | Test Acc: {avg_test_acc:.2f}%')
             print(f"\tTime: {epoch_time:.2f} seconds")
         else:
             print("Warm Up train")
