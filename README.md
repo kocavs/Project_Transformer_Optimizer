@@ -81,3 +81,34 @@ Epoch:  2
         Train Loss: 0.00341 | Train Acc: 96.58%
         Test. Loss: 0.00677 |  Test Acc: 94.10%
         Time: 113.67 seconds
+        
+# Using DDP (Distributed Data Parallel) with three models (With batch size 32 and one warm up epoch)
+## bert-base-uncased
+Epoch:  1
+        Train Loss: 0.00491 | Train Acc: 95.18%
+        Test Loss: 0.00667 | Test Acc: 92.80%
+        Time: 149.79 seconds
+Epoch:  2
+        Train Loss: 0.00309 | Train Acc: 96.92%
+        Test Loss: 0.00735 | Test Acc: 92.40%
+        Time: 149.67 seconds
+
+## distilbert-base-uncased:
+Epoch:  1
+        Train Loss: 0.00563 | Train Acc: 94.12%
+        Test Loss: 0.00776 | Test Acc: 92.00%
+        Time: 77.66 seconds
+Epoch:  2
+        Train Loss: 0.00352 | Train Acc: 96.68%
+        Test Loss: 0.00806 | Test Acc: 91.60%
+        Time: 77.89 seconds
+
+## roberta-base:
+Epoch:  1
+        Train Loss: 0.00544 | Train Acc: 94.44%
+        Test Loss: 0.00618 | Test Acc: 94.20%
+        Time: 151.49 seconds
+Epoch:  2
+        Train Loss: 0.00351 | Train Acc: 96.62%
+        Test Loss: 0.00600 | Test Acc: 93.80%
+        Time: 151.53 seconds
