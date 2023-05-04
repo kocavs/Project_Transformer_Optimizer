@@ -104,11 +104,11 @@ Epoch:  2
         Time: 77.89 seconds
 
 ## roberta-base:
-Epoch:  1
-        Train Loss: 0.00544 | Train Acc: 94.44%
-        Test Loss: 0.00618 | Test Acc: 94.20%
-        Time: 151.49 seconds
-Epoch:  2
-        Train Loss: 0.00351 | Train Acc: 96.62%
-        Test Loss: 0.00600 | Test Acc: 93.80%
-        Time: 151.53 seconds
+Epoch:  1<br>
+        Train Loss: 0.00544 | Train Acc: 94.44%<br>
+        Test Loss: 0.00618 | Test Acc: 94.20%<br>
+        Time: 151.49 seconds<br>
+Epoch:  2<br>
+        Train Loss: 0.00351 | Train Acc: 96.62%<br>
+        Test Loss: 0.00600 | Test Acc: 93.80%<br>
+        Time: 151.53 seconds<br>
