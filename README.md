@@ -24,36 +24,36 @@ For distributed Data Parallel, run it by
 CUDA_VISIBLE_DEVICES="0,1" python -m torch.distributed.launch --nproc_per_node 2 ddp.py --ddp --batch_size 32 --pretrained_model_name "roberta-base"
 
 
-# Pretrained result with three models (With batch size 32 and one warm up epoch)
+# Pretrained result with three models (With batch size 32 and warm up steps)
 ## bert-base-uncased
-Epoch:  1<br>
-        Train Loss: 0.00491 | Train Acc: 94.94%<br>
-        Test. Loss: 0.00698 |  Test Acc: 92.90%<br>
-        Time: 337.17 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00245 | Train Acc: 97.62%<br>
-        Test. Loss: 0.00722 |  Test Acc: 93.50%<br>
-        Time: 337.34 seconds<br>
+Epoch:  1
+        Train Loss: 0.01392 | Train Acc: 84.04%
+        Test. Loss: 0.00820 |  Test Acc: 91.03%
+        Time: 339.59 seconds
+Epoch:  2
+        Train Loss: 0.00489 | Train Acc: 94.90%
+        Test. Loss: 0.00802 |  Test Acc: 91.26%
+        Time: 338.74 seconds
 
 ## distilbert-base-uncased:
-Epoch:  1<br>
-        Train Loss: 0.00499 | Train Acc: 94.89%<br>
-        Test. Loss: 0.00660 |  Test Acc: 93.00%<br>
-        Time: 173.95 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00280 | Train Acc: 97.42%<br>
-        Test. Loss: 0.00722 |  Test Acc: 92.80%<br>
-        Time: 173.88 seconds<br>
+Epoch:  1
+        Train Loss: 0.01435 | Train Acc: 85.00%
+        Test. Loss: 0.00859 |  Test Acc: 90.57%
+        Time: 174.58 seconds
+Epoch:  2
+        Train Loss: 0.00518 | Train Acc: 94.70%
+        Test. Loss: 0.00787 |  Test Acc: 91.67%
+        Time: 173.88 seconds
 
 ## roberta-base:
-Epoch:  1<br>
-        Train Loss: 0.00578 | Train Acc: 93.80%<br>
-        Test. Loss: 0.00686 |  Test Acc: 93.40%<br>
-        Time: 340.80 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00353 | Train Acc: 96.20%<br>
-        Test. Loss: 0.00653 |  Test Acc: 94.40%<br>
-        Time: 340.17 seconds<br>
+Epoch:  1
+        Train Loss: 0.01373 | Train Acc: 83.60%
+        Test. Loss: 0.00804 |  Test Acc: 91.30%
+        Time: 340.50 seconds
+Epoch:  2
+        Train Loss: 0.00506 | Train Acc: 94.55%
+        Test. Loss: 0.00732 |  Test Acc: 92.29%
+        Time: 340.03 seconds
 
 
 # Using DP (Data Parallel) with three models (With batch size 32 and one warm up epoch)
@@ -119,67 +119,69 @@ Epoch:  2<br>
         Test Loss: 0.00600 | Test Acc: 93.80%<br>
         Time: 151.53 seconds<br>
 
-# Pretrained result with three models (With batch size 128 and one warm up epoch)
+
+# Using DP (Data Parallel) with three models (With batch size 128 and warm up steps)
 ## bert-base-uncased
-Epoch:  1<br>
-        Train Loss: 0.00144 | Train Acc: 94.14%<br>
-        Test. Loss: 0.00195 |  Test Acc: 91.48%<br>
-        Time: 172.10 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00087 | Train Acc: 96.77%<br>
-        Test. Loss: 0.00194 |  Test Acc: 92.12%<br>
-        Time: 172.30 seconds<br>
-
-## distilbert-base-uncased:
-Epoch:  1<br>
-        Train Loss: 0.00192 | Train Acc: 92.14%<br>
-        Test. Loss: 0.00218 |  Test Acc: 90.92%<br>
-        Time: 88.13 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00128 | Train Acc: 95.25%<br>
-        Test. Loss: 0.00199 |  Test Acc: 91.78%<br>
-        Time: 88.29 seconds<br>
-
-## roberta-base:
-Epoch:  1<br>
-        Train Loss: 0.00159 | Train Acc: 93.39%<br>
-        Test. Loss: 0.00188 |  Test Acc: 92.86%<br>
-        Time: 172.63 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00100 | Train Acc: 96.07%<br>
-        Test. Loss: 0.00187 |  Test Acc: 93.16%<br>
-        Time: 172.64 seconds<br>
-
-
-# Using DP (Data Parallel) with three models (With batch size 128 and one warm up epoch)
-## bert-base-uncased
-Epoch:  1<br>
-        Train Loss: 0.00153 | Train Acc: 93.88%<br>
-        Test. Loss: 0.00197 |  Test Acc: 91.86%<br>
-        Time: 171.70 seconds<br>
+Epoch:  1
+        Train Loss: 0.00452 | Train Acc: 79.25%
+        Test. Loss: 0.00224 |  Test Acc: 90.55%
+        Time: 173.57 seconds
 Epoch:  2
-        Train Loss: 0.00097 | Train Acc: 96.40%<br>
-        Test. Loss: 0.00195 |  Test Acc: 91.96%<br>
-        Time: 171.77 seconds<br>
+        Train Loss: 0.00162 | Train Acc: 93.09%
+        Test. Loss: 0.00208 |  Test Acc: 90.95%
+        Time: 172.01 seconds
 
 ## distilbert-base-uncased:
-Epoch:  1<br>
-        Train Loss: 0.00167 | Train Acc: 93.17%<br>
-        Test. Loss: 0.00212 |  Test Acc: 91.74%<br>
-        Time: 87.86 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00114 | Train Acc: 95.85%<br>
-        Test. Loss: 0.00201 |  Test Acc: 91.76%<br>
-        Time: 88.27 seconds<br>
+Epoch:  1
+        Train Loss: 0.00470 | Train Acc: 80.26%
+        Test. Loss: 0.00239 |  Test Acc: 89.76%
+        Time: 90.32 seconds
+Epoch:  2
+        Train Loss: 0.00198 | Train Acc: 92.15%
+        Test. Loss: 0.00215 |  Test Acc: 90.74%
+        Time: 88.44 seconds
 
 
 ## roberta-base:
-Epoch:  1<br>
-        Train Loss: 0.00149 | Train Acc: 93.93%<br>
-        Test. Loss: 0.00178 |  Test Acc: 92.68%<br>
-        Time: 172.27 seconds<br>
-Epoch:  2<br>
-        Train Loss: 0.00096 | Train Acc: 96.17%<br>
-        Test. Loss: 0.00195 |  Test Acc: 92.56%<br>
-        Time: 172.65 seconds<br>
+Epoch:  1
+        Train Loss: 0.00460 | Train Acc: 76.74%
+        Test. Loss: 0.00225 |  Test Acc: 90.62%
+        Time: 174.80 seconds
+Epoch:  2
+        Train Loss: 0.00164 | Train Acc: 92.89%
+        Test. Loss: 0.00196 |  Test Acc: 91.82%
+        Time: 172.94 seconds
 
+# Using DP(Data Parallel) + mixed-precision training with three models (With batch size 128 and warm up steps)
+
+## bert-base-uncased
+Epoch:  1
+        Train Loss: 0.00465 | Train Acc: 79.36%
+        Test. Loss: 0.00231 |  Test Acc: 89.92%
+        Time: 83.43 seconds
+Epoch:  2
+        Train Loss: 0.00172 | Train Acc: 93.17%
+        Test. Loss: 0.00211 |  Test Acc: 90.84%
+        Time: 81.23 seconds
+
+## distilbert-base-uncased:
+
+Epoch:  1
+        Train Loss: 0.00473 | Train Acc: 78.55%
+        Test. Loss: 0.00226 |  Test Acc: 90.47%
+        Time: 42.36 seconds
+Epoch:  2
+        Train Loss: 0.00191 | Train Acc: 92.12%
+        Test. Loss: 0.00215 |  Test Acc: 90.57%
+        Time: 39.95 seconds
+
+## roberta-base:
+
+Epoch:  1
+        Train Loss: 0.00442 | Train Acc: 77.98%
+        Test. Loss: 0.00220 |  Test Acc: 90.71%
+        Time: 84.50 seconds
+Epoch:  2
+        Train Loss: 0.00183 | Train Acc: 92.25%
+        Test. Loss: 0.00204 |  Test Acc: 91.43%
+        Time: 82.26 seconds
