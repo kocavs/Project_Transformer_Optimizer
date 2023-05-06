@@ -2,7 +2,7 @@ from datasets import load_dataset
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 
-def dataloader(name, token_name, train_length, test_length, batch_size):
+def dataloader(name, token_name, train_length, batch_size):
   
     def tokenize_function(examples):
       tokenizer = AutoTokenizer.from_pretrained(token_name)
@@ -18,7 +18,7 @@ def dataloader(name, token_name, train_length, test_length, batch_size):
     tokenized_datasets.set_format("torch")
     # print("train_datasets: \n", tokenized_datasets)
     train_datasets = tokenized_datasets["train"].select(range(train_length))
-    test_datasets = tokenized_datasets["test"].select(range(test_length))
+    test_datasets = tokenized_datasets["test"]
 
     # print("train_datasets: \n", train_datasets)
     # print(train_datasets["input_ids"].shape)

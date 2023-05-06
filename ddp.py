@@ -129,7 +129,7 @@ def main(opts):
     train_loader, test_loader, train_sampler, test_sampler = dataloader(name="ag_news",
                                                                         token_name=opts.pretrained_model_name,
                                                                         train_length=10000,
-                                                                        test_length=1000,
+                                                                        test_length=5000,
                                                                         batch_size=opts.batch_size,
                                                                         ddp=opts.ddp)
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=8, help='Batch size for training and testing')
 
     parser.add_argument('--ddp', action="store_true", help='enable distributed data parallel')
-    parser.add_argument('--local_rank', default=-1, type=int, help='enable distributed data parallel')
+    parser.add_argument('--local-rank', default=-1, type=int, help='enable distributed data parallel')
     opts = parser.parse_args()
 
     # enable Distributed Data parallel
