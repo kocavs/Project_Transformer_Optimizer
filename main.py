@@ -15,7 +15,8 @@ import torch.cuda.amp as amp
 # from torch.distributed import rpc
 # import tempfile
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# Function to padding and change the tokens according to the pretrained model
+
+
 def calcuate_accuracy(preds, labels):
     idx_max = torch.argmax(preds, dim=-1)
     n_correct = (idx_max == labels).sum().item()
