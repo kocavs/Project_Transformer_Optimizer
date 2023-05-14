@@ -29,7 +29,9 @@ python main.py
         --mixed Mixed-precision training          enable Mixed-precision training
         --batch_size BATCH_SIZE Batch size for training and testing
 
-For Distributed Data Parallel, run it by
+For Distributed Data Parallel, 
+If PyTorch version >= 2.0.0, change to local-rank. Otherwise, change to local_rank.
+run it by
 ```
 CUDA_VISIBLE_DEVICES="0,1" python -m torch.distributed.launch --nproc_per_node 2 ddp.py --ddp --batch_size 32 --pretrained_model_name "roberta-base"
 ```
