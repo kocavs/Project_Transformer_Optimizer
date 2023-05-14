@@ -121,13 +121,13 @@ Epoch:  2<br>
 
 ## roberta-base:
 Epoch:  1<br>
-        Train Loss: 0.00544 | Train Acc: 94.44%<br>
-        Test Loss: 0.00618 | Test Acc: 94.20%<br>
-        Time: 151.49 seconds<br>
+        Train Loss: 0.00528 | Train Acc: 94.36%<br>
+        Test Loss: 0.00646 | Test Acc: 93.60%<br>
+        Time: 174.24 seconds<br>
 Epoch:  2<br>
-        Train Loss: 0.00351 | Train Acc: 96.62%<br>
-        Test Loss: 0.00600 | Test Acc: 93.80%<br>
-        Time: 151.53 seconds<br>
+        Train Loss: 0.00333 | Train Acc: 96.64%<br>
+        Test Loss: 0.00628 | Test Acc: 94.20%<br>
+        Time: 174.46 seconds<br>
 
 
 # Using DP (Data Parallel) with three models (With batch size 128 and warm up steps)
