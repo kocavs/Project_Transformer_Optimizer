@@ -195,3 +195,28 @@ Epoch:  2<br>
         Train Loss: 0.00183 | Train Acc: 92.25%<br>
         Test. Loss: 0.00204 |  Test Acc: 91.43%<br>
         Time: 82.26 seconds<br>
+
+# Conclusion
+<ul>
+<li>Optimization Techniques:
+	<ul>
+	<li>Data parallelism, distributed data parallelism, and mixed precision training significantly reduce training time.
+	</ul>
+
+<li>Model Performance:
+	<ul>
+	<li>All three models (BERT, DistilBERT, and RoBERTa) show improved performance in terms of test accuracy after the second epoch.
+	<li>RoBERTa demonstrates the highest test accuracy among the three models.
+	</ul>
+<li>Training Time:
+	<ul>
+	<li>The use of data parallelism considerably reduces training time compared to pre-trained models without parallelism.
+	<li>DistilBERT demonstrates the shortest training time among the three models due to its smaller architecture.
+	</ul>
+<li>Training and Test Loss:
+	<ul>
+	<li>All models show a decrease in both training and test loss after the second epoch.
+	<li>RoBERTa demonstrates the lowest test loss, indicating its better generalization capability.
+	</ul>
+</ul>
+
