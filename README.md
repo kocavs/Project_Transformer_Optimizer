@@ -1,9 +1,18 @@
 # Project_Transformer_Optimizer
+Currently, there are numerous large pre-trained models based on transformers. 
+However, these models often require a significant amount of time to finetune. 
+Our task is to decrease the training time for these large models by using various 
+parallel methods while ensuring that their quality remains unaffected. To demonstrate 
+the feasibility of the parallel approach, we will test several models and compare the 
+time saved for each model after optimization. This will enable us to observe and measure 
+the impact of parallel methods on different models.
 
-# Requirement
-
-1. transformer
-2. datasets
+# Repository and code structure:
+* main.py            (Base method, DP method and mixed method)
+* DataLoad.py        (Dataloader for main.py)
+* README.md          (Readme file contains introduction and results)
+* ddp.py             (DDP method)
+* plotfigure.py      (Code to plot image results)
 
 # Executing the project:
 For base and Data Parallel, run it by
