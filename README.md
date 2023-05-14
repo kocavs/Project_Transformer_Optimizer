@@ -66,7 +66,7 @@ Epoch:  2<br>
         Time: 340.03 seconds<br>
 
 
-# Using DP (Data Parallel) with three models (With batch size 32 and one warm up epoch)
+# Using DP (Data Parallel) with three models (With batch size 32 and warm up steps)
 ## bert-base-uncased
 Epoch:  1<br>
 	Train Loss: 0.01359 | Train Acc: 84.14%<br>
@@ -98,7 +98,7 @@ Epoch:  2<br>
 	Test. Loss: 0.00775 |  Test Acc: 91.76%<br>
 	Time: 201.82 seconds<br>
         
-# Using DDP (Distributed Data Parallel) with three models (With batch size 32 and one warm up epoch)
+# Using DDP (Distributed Data Parallel) with three models (With batch size 32 and warm up steps)
 ## bert-base-uncased
 Epoch:  1<br>
         Train Loss: 0.00491 | Train Acc: 95.18%<br>
