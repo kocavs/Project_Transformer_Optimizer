@@ -26,7 +26,7 @@ python main.py
         --num_classes NUM_CLASSES Number of classes
         --lr LR               Learning Rate
         --DP DP               enable data parallel
-        --pipe PIPE           enable pipeline model
+        --mixed Mixed-precision training          enable Mixed-precision training
         --batch_size BATCH_SIZE Batch size for training and testing
 
 For Distributed Data Parallel, run it by
@@ -69,34 +69,34 @@ Epoch:  2<br>
 # Using DP (Data Parallel) with three models (With batch size 32 and one warm up epoch)
 ## bert-base-uncased
 Epoch:  1<br>
-        Train Loss: 0.00489 | Train Acc: 95.05%<br>
-        Test. Loss: 0.00645 |  Test Acc: 93.10%<br>
-        Time: 199.22 seconds<br>
+	Train Loss: 0.01359 | Train Acc: 84.14%<br>
+	Test. Loss: 0.00865 |  Test Acc: 90.82%<br>
+	Time: 201.73 seconds<br>
 Epoch:  2<br>
-        Train Loss: 0.00257 | Train Acc: 97.53%<br>
-        Test. Loss: 0.00658 |  Test Acc: 93.30%<br>
-        Time: 199.30 seconds<br>
+	Train Loss: 0.00457 | Train Acc: 95.17%<br>
+	Test. Loss: 0.00791 |  Test Acc: 91.43%<br>
+	Time: 198.37 seconds<br>
 
 ## distilbert-base-uncased:
 Epoch:  1<br>
-        Train Loss: 0.00508 | Train Acc: 94.87%<br>
-        Test. Loss: 0.00673 |  Test Acc: 92.80%<br>
-        Time: 104.60 seconds<br>
+	Train Loss: 0.01427 | Train Acc: 84.38%<br>
+	Test. Loss: 0.00819 |  Test Acc: 91.04%<br>
+	Time: 107.80 seconds<br>
 Epoch:  2<br>
-        Train Loss: 0.00283 | Train Acc: 97.40%<br>
-        Test. Loss: 0.00696 |  Test Acc: 93.50%<br>
-        Time: 104.73 seconds<br>
+	Train Loss: 0.00520 | Train Acc: 94.83%<br>
+	Test. Loss: 0.00802 |  Test Acc: 91.47%<br>
+	Time: 103.65 seconds<br>
 
 
 ## roberta-base:
 Epoch:  1<br>
-        Train Loss: 0.00571 | Train Acc: 93.76%<br>
-        Test. Loss: 0.00642 |  Test Acc: 94.00%<br>
-        Time: 113.75 seconds<br>
+	Train Loss: 0.01468 | Train Acc: 82.24%<br>
+	Test. Loss: 0.00921 |  Test Acc: 90.49%<br>
+	Time: 202.26 seconds<br>
 Epoch:  2<br>
-        Train Loss: 0.00341 | Train Acc: 96.58%<br>
-        Test. Loss: 0.00677 |  Test Acc: 94.10%<br>
-        Time: 113.67 seconds<br>
+	Train Loss: 0.00602 | Train Acc: 93.38%<br>
+	Test. Loss: 0.00775 |  Test Acc: 91.76%<br>
+	Time: 201.82 seconds<br>
         
 # Using DDP (Distributed Data Parallel) with three models (With batch size 32 and one warm up epoch)
 ## bert-base-uncased
